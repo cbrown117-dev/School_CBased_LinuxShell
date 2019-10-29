@@ -245,4 +245,23 @@ void sandf(char *path, size_t check){
 		reg(find);
 }
 
+void listing (char **argv) {
+	  struct dirent *dirent;
+	  DIR *parentDir;
 
+	  parentDir = opendir (argv[0]);
+
+	  if (parentDir == NULL) {
+	  	printf ("Error opening directory '%s'\n", argv[1]);
+	  	exit (-1);
+	  }
+	
+	  int count = 1;
+
+	  while((dirent = readdir(parentDir)) != NULL){
+		  printf ("[%d] %s\n", count, (*dirent).d_name);
+		  count++;
+	 }
+
+	 closedir (parentDir);
+}

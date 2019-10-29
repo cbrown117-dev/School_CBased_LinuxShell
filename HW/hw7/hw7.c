@@ -40,13 +40,15 @@ int main (int argc, char **argv){
 
 			pid = fork();
 			if (pid == 0){ //is the child 
-				execvp(overall[0], overall);
+				execvp(overall[0], &overall);
 				time(&end);
 				printf("if you see this statement then exec failed ; -(\n");
 				exit(-1);
 			}
 
 			else if (pid > 0){ //this is the parent process
+				 if(feof(fp)){ break;} 
+
 				printf("Wait for the child process to terminate\n");
 				time(&curtime); //gets cutrent time
 				loc_time = localtime(&curtime); //local time

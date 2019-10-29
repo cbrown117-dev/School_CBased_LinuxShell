@@ -41,17 +41,18 @@ int main(int argc, char **argv){
                	char *token = strtok(ch," ");
 		
 		if( strcmp(ch, "hostname\n") == 0 )
-			printf("blazersh> %s\n", printcwd());
+			printf("blazersh> %s\n", printcwd()); fflush(stdin);
 
-		if( strcmp(ch, "list\n") ==0 )
+		else if( strcmp(ch, "list\n") ==0 )
 			listing();
 
-		if ( strcmp(token, "cd")== 0 )
+		else if ( strcmp(token, "cd")== 0 )
 			change(ch);
 	
-		if( strcmp(ch, "history\n") == 0 ){
+		else if( strcmp(ch, "history\n") == 0 ){
 			fclose(build_hy);
 			printf("blazersh>history:\n");
+			fflush(stdin);
 			FILE *see_hy = fopen(argv[1],"r");
 		
 			while( !feof(see_hy) ){
@@ -63,9 +64,9 @@ int main(int argc, char **argv){
 				fclose(see_hy);
 		}
 
-		if( strcmp(ch,"help\n")== 0 )
+		else if( strcmp(ch,"help\n")== 0 )
 			help();
-/*
+
 		else{
                 	char cmd[100];
 
@@ -79,9 +80,19 @@ int main(int argc, char **argv){
 			if( pid == 0 ){
 				execvp(overall[0], overall);
 				printf("blazersh> if you're seeing this the file may not exist or exec failed\n");
+				printf("blazersh> make sure you have ./ infront of your file name\n");
 			}
+        		else if (pid > 0){ //waits till child is done
+                	wait(&status);
+                	if(WIFEXITED(status)){
+                        	printf("blazersh> child process exited with status = %d\n", WEXITSTATUS(status));
+                	}
+                		else{
+                        		printf("blazersh> child process did not terminate normally\n");
+                		}
+        }
 		}
-*/
+
 		char check[150];
 		printf("blazersh> ");
 		fflush(stdin);
@@ -91,17 +102,6 @@ int main(int argc, char **argv){
 		i++;
 	}
 
-/*
-	if (pid > 0){ //waits till child is done
-		wait(&status);
-		if(WIFEXITED(status)){
-			printf("blazersh> child process exited with status = %d\n", WEXITSTATUS(status));
-		}
-		else{
-			printf("blazersh> child process did not terminate normally\n");
-		}
-	}
-*/
 	fclose(build_hy);
 
 return 0;

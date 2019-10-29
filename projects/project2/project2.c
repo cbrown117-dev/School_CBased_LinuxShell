@@ -40,8 +40,10 @@ int main(int argc, char **argv){
 	while( strcmp(ch, "quit\n") != 0 ){
                	char *token = strtok(ch," ");
 		
-		if( strcmp(ch, "hostname\n") == 0 )
-			printf("blazersh> %s\n", printcwd()); fflush(stdin);
+		if( strcmp(ch, "hostname\n") == 0 ){
+			printf("blazersh> %s\n", printcwd()); 
+			fflush(stdin);
+		}
 
 		else if( strcmp(ch, "list\n") ==0 )
 			listing();

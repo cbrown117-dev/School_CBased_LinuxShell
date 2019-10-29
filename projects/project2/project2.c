@@ -23,11 +23,12 @@ void change(char *);
 void help();
 
 int main(int argc, char **argv){
+	pid_t pid;
+	int status;
 
 	if(argc < 2){  printf("need more arguements (a file to read and write to)\n"); }
 
 	FILE *build_hy = fopen(argv[1], "w");
-	
 	int i = 1;
 
 	printf("blazersh> ");
@@ -35,15 +36,16 @@ int main(int argc, char **argv){
 	fgets(ch,150,stdin);
 	fprintf(build_hy,"%s ", ch);
 
+		
 	while( strcmp(ch, "quit\n") != 0 ){
-		char *token = strtok(ch, " ");
+               	char *token = strtok(ch," ");
 		
 		if( strcmp(ch, "hostname\n") == 0 )
 			printf("blazersh> %s\n", printcwd());
 
 		if( strcmp(ch, "list\n") ==0 )
 			listing();
-	
+
 		if ( strcmp(token, "cd")== 0 )
 			change(ch);
 	
@@ -58,12 +60,28 @@ int main(int argc, char **argv){
 				printf("\t%s\n", hy);
 			}
 
-			fclose(see_hy);
+				fclose(see_hy);
 		}
 
 		if( strcmp(ch,"help\n")== 0 )
 			help();
+/*
+		else{
+                	char cmd[100];
 
+                	strcpy(cmd, token);
+                	token = strtok(NULL, " ");
+			printf("%s %s \n", cmd, token);
+                	char *overall[] = {cmd, token, NULL};
+                	printf("%s %s \n", cmd, token);
+			
+			pid = fork();
+			if( pid == 0 ){
+				execvp(overall[0], overall);
+				printf("blazersh> if you're seeing this the file may not exist or exec failed\n");
+			}
+		}
+*/
 		char check[150];
 		printf("blazersh> ");
 		fflush(stdin);
@@ -73,11 +91,23 @@ int main(int argc, char **argv){
 		i++;
 	}
 
+/*
+	if (pid > 0){ //waits till child is done
+		wait(&status);
+		if(WIFEXITED(status)){
+			printf("blazersh> child process exited with status = %d\n", WEXITSTATUS(status));
+		}
+		else{
+			printf("blazersh> child process did not terminate normally\n");
+		}
+	}
+*/
 	fclose(build_hy);
 
 return 0;
 }
 
+//prints cwd
 char* printcwd(){
 	long size;
 	char *buf;
@@ -93,6 +123,7 @@ char* printcwd(){
 	return ptr;
 }
 
+//list all files in current directory
 void listing(){
           struct dirent *dirent;
 	  DIR *parentDir;
@@ -112,6 +143,7 @@ void listing(){
 	  closedir (parentDir);
 }
 
+//changes the pwd
 void change(char *cd){
 	int i, j = 0;
 	char str[100];
@@ -126,6 +158,7 @@ void change(char *cd){
 	printf("blazersh>%s\n", printcwd());
 }
 
+//prints help commands
 void help(){
 	printf("\ttype list to get all files and directories in current directory\n");
 	printf("\ttype cd <directory> to change directories\n");

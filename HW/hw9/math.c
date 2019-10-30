@@ -5,7 +5,7 @@ int main(){
 
 	int j = 1000000, i = 0;
 	for( i=0;i<j;i++ ){
-	
+		i--;	
 	}
 
 	return 0;

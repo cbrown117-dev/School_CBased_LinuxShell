@@ -11,9 +11,8 @@ static void sig_int(int);
 int main(int argc, char **argv) {
 	    pid_t pid;
 	    int status;
-
-	    
-
+	
+ 
 	    if (argc < 2) {
 	            printf("Usage: %s <command> [args]\n", argv[0]);
 	            exit(-1);
@@ -27,6 +26,18 @@ int main(int argc, char **argv) {
 
 	    } else if (pid > 0) { /* this is the parent process */
 		      printf("Wait for the child process to terminate\n");
+		      if(signal(SIGINT, sig_usr) == SIG_ERR){
+				printf("can't catch SIGINT\n");
+		      		exit(-1);
+		      }
+		      if(signal(SIGQUIT, sig_usr) == SIG_ERR){
+		      		printf("can't catch SIGINT\n");
+				exit(-1);
+		      }
+		      if(signal(SIGTSTP,sig_usr)==SIG_ERR){
+		      		printf("can't catch SIGTSTP\n");
+				exit(-1);
+		      }
 		      wait(&status); /* wait for the child process to terminate */
 		      if (WIFEXITED(status)) { /* child process terminated normally */
 			      printf("Child process exited with status = %d\n", WEXITSTATUS(status));
@@ -40,32 +51,32 @@ int main(int argc, char **argv) {
 			exit(EXIT_FAILURE);
 	      }
 
-    	    printf("[%ld]: Exiting program .....\n", (long)getpid());
+  	    printf("[%ld]: Exiting program .....\n", (long)getpid());
   
 	return 0;
 }
 
 static void sig_usr(int signo){
+	int pid = getpid();
 	switch(signo){
 		case SIGINT:
 			printf("recieved SIGINT signal %d\n", signo);
+			kill(pid, SIGINT);
 			break;
 		case SIGQUIT:
 		        printf("recieved SIGQUIT signal %d\n", signo);
+			int ppid = getppid();
+			kill(ppid,SIGQUIT);
 		        break;	
-                case SIGUSR1:
-                        printf("recieved SIGUSR1 signal %d\n", signo);
-                        break;
-		case SIGUSR2:
-			printf("recieved SIGUSR2 signal %d\n", signo);
-                        break;
                 case SIGTSTP:
                         printf("recieved SIGTSTP signal %d\n", signo);
+			printf("will pause\n ");
+			pause();
                         break;
 		default:
 			printf("recieved signal %d\n", signo);			
-	
 	}
+
 }
 
 static void sig_int(int signo) {

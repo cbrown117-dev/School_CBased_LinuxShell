@@ -35,19 +35,11 @@ int main (int argc, char **argv){
 			exit(-1);
 		}
 
-		/*
-		 * open file to write standard output steam in append mode
-		 * create a new file if the file does not exist
-		 */
-		if( (fdout = open("stdout.txt", O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
-			printf("Error opening file stdout.txt for output\n");
-			exit(-1);
-		}
-
 		
 		fp = fopen(argv[1], "r");
 
 		while( !feof(fp) ){
+                	time_t curtime, begin, end;
 			result = fgets(str, MAX_LEN, fp);
 			char *token = strtok(result," ");
 			char cmd[MAX_LEN]; 
@@ -58,8 +50,22 @@ int main (int argc, char **argv){
 			char *overall[] = {cmd, token, NULL};
 			time(&begin); //start timer
 
+printf("%s %s \n", overall[0], overall[1]);
+
 			pid = fork();
 			if (pid == 0){ //is the child i
+                		
+				char buf[50];
+				sprintf(buf, "%d.pid", pid);
+                		/*
+                 		* open file to write standard output steam in append mode
+                 		* create a new file if the file does not exist
+                 		*/
+                		if( (fdout = open(buf, O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
+                        		printf("Error opening file stdout.txt for output\n");
+                        		exit(-1);
+               	 		}
+
 				/*replace standard input stream with the file stdin.txt */
 				dup2(fdin, 0);
 
@@ -100,6 +106,7 @@ int main (int argc, char **argv){
 
 					/*write to log time it took*/
 					FILE *to = fopen("log.txt", "wx");
+					printf("started at: %s took: %f \n", asctime(loc_time), difftime(end, begin));
 					fprintf(to,"started at: %s took: %f \n", asctime(loc_time), difftime(end, begin));
 					fclose(to);
 

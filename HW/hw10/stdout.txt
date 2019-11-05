@@ -1,5 +1,0 @@
-a = 100
-b = 105
-Hey! This is the parent process
-a = 100
-b = 105

@@ -12,14 +12,12 @@
 
 int main (int argc, char **argv){
 	        pid_t pid;
-		FILE *fp;
-		time_t curtime, begin, end;
-		struct tm *loc_time;
-		char str[MAX_LEN];
-		char *result;
-		int status;
-		int fdin, fdout;
+		time_t curtime, curtime2;
+		struct tm *loc_time; struct tm *loc_time2;
 		
+		char *start; char *end; char* command; char *command2;
+		int fdin, fdout, err, status;
+		FILE *fp; FILE *to = fopen("log.txt", "w");
 
 		if(argc < 2){
 			printf("Usage: %s <command>[args]\n", argv[0]);
@@ -37,35 +35,34 @@ int main (int argc, char **argv){
 
 		
 		fp = fopen(argv[1], "r");
+		pid = fork();
+		if (pid == 0){ //is the child
+			while( !feof(fp) ){
+				char str[MAX_LEN];		
+				char *result = fgets(str, MAX_LEN, fp);
+				char *token = strtok(result," ");
+				char cmd[MAX_LEN];
+				strcpy(cmd, token);
+				token = strtok(NULL, " ");
+				char *overall[] = {cmd, token, NULL};
+				
+				strcpy(command, cmd); strcpy(command2, token);
+				printf("%s %s", command, command2);
 
-		while( !feof(fp) ){
-                	time_t curtime, begin, end;
-			result = fgets(str, MAX_LEN, fp);
-			char *token = strtok(result," ");
-			char cmd[MAX_LEN]; 
-			
-			strcpy(cmd, token);
-			token = strtok(NULL, " ");
-
-			char *overall[] = {cmd, token, NULL};
-			time(&begin); //start timer
-
-printf("%s %s \n", overall[0], overall[1]);
-
-			pid = fork();
-			if (pid == 0){ //is the child i
-                		
+				int pid_id = getpid();
 				char buf[50];
-				sprintf(buf, "%d.pid", pid);
-                		/*
-                 		* open file to write standard output steam in append mode
-                 		* create a new file if the file does not exist
-                 		*/
+				sprintf(buf, "%d.out", pid_id);
+			
+				/*
+               			* open file to write standard output steam in append mode
+               			* create a new file if the file does not exist
+               			*/
                 		if( (fdout = open(buf, O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
-                        		printf("Error opening file stdout.txt for output\n");
-                        		exit(-1);
-               	 		}
-
+       	                		printf("Error opening file stdout.txt for output\n");
+               	        		exit(-1);
+				}
+				
+			
 				/*replace standard input stream with the file stdin.txt */
 				dup2(fdin, 0);
 
@@ -79,57 +76,50 @@ printf("%s %s \n", overall[0], overall[1]);
 				 * that writes the error message to stderr
 				 */
 				perror("exec");
-				time(&end);
 			}
-
-			else if (pid > 0){ //this is the parent process
-
-				/*output from the parent process still goes to stdout : -) */
-				printf("Wait for the child process to terminate\n");
-				time(&curtime); //gets cutrent time
-				loc_time = localtime(&curtime); //local time
-				
-				//end time and record difference
-				wait(&status);
-				time(&end);
-				end = time(NULL);
-
-				if( WIFEXITED(status) ){ /*child process terminated normally */
-					printf("Child process exited with status = %d\n", WEXITSTATUS(status));
-					/*parent process still has the file handle to stdou.txt,
-					 * now that the child process is done, let us write to 
-					 * the file stdout.txt using the write system call
-					 */
-					
-					close(fdout);
-					close(fdin);
-
-					/*write to log time it took*/
-					FILE *to = fopen("log.txt", "wx");
-					printf("started at: %s took: %f \n", asctime(loc_time), difftime(end, begin));
-					fprintf(to,"started at: %s took: %f \n", asctime(loc_time), difftime(end, begin));
-					fclose(to);
-
-					/*since we opened the file in append mode, the above text 
-					 * will be added after the output from the child process
-					 */
-				}
-				else { /*child process did not terminate normally */
-					printf("Child process did not terminate normally\n");
-					/*look at the man page for wait (man 2 wait) to determine
-					 * how the child process was terminated
-					 */
-				}
-				//process should be done, now to write to file				
-				
-			} 
-			
-			else{ /*we have an error */
-				perror("fork");
-				exit(EXIT_FAILURE);
-			}
-			
 		}
+
+		else if (pid > 0){ //this is the parent process
+			/*output from the parent process still goes to stdout : -) */
+			printf("Wait for the child process to terminate\n");
+                        
+		 	//time handle
+			curtime = time(NULL);
+			loc_time = localtime(&curtime);
+			printf("first time %s\n", asctime(loc_time));
+			strcpy(start, asctime(loc_time));				
+			
+			wait(&status);
+						
+			if( WIFEXITED(status) ){ /*child process terminated normally */
+				printf("Child process exited with status = %d\n", WEXITSTATUS(status));
+				/*parent process still has the file handle to stdou.txt,
+				 * now that the child process is done, let us write to 
+				 * the file stdout.txt using the write system call
+				 */
+
+				printf("made it here before the fprintf to to\n");
+				/*write to log time it took*/
+				fprintf(to,"%s %s %s %s\n", command, command2, start,end);
+				
+				close(fdout);
+					
+			}
+			else { /*child process did not terminate normally */
+				printf("Child process did not terminate normally\n");
+				/*look at the man page for wait (man 2 wait) to determine
+				 * how the child process was terminated
+				 */
+			}			
+			
+		} 
+			
+		else{ /*we have an error */
+			perror("fork");
+			exit(EXIT_FAILURE);   
+		}
+			
+	fclose(to);
 
 return 0;
 }

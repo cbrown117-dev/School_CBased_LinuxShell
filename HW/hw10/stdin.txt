@@ -1,2 +1,2 @@
-./math 100
 ./print hello
+./math 100

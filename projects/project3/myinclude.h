@@ -4,12 +4,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 char* printcwd();
-void listing();
+void list();
 void change(char *);
 void help();
 
@@ -31,7 +32,7 @@ char* printcwd(){
 }
 
 //list all files in current directory
-void listing(){
+void list(){
           struct dirent *dirent;
 	  DIR *parentDir;
 	  char *ptr = printcwd();
@@ -74,4 +75,43 @@ void help(){
 	printf("\ttype help for this display\n");
 	printf("\ttype history to see what all you have typed in this console\n");
 	printf("\ttype quit to stop\n");  
+}
+
+static void sig_usr(int signo){
+	int pid = getpid();
+	switch(signo){
+		case SIGINT:
+			printf("process with pid=%d is interrupted\n", pid);
+			kill(pid, SIGINT);
+			break;
+		case SIGQUIT:
+                        printf("recieved SIGQUIT signal %d\n killing parent", signo);
+			int ppid = getppid();
+			kill(ppid, SIGQUIT);
+			break;  
+		case SIGTSTP:
+			printf("process with pid=%d is stopped\n", pid);
+			/*int response = 0;
+			char piece[10];
+			sprintf(piece, "%d", pid);
+			while(response == 0){
+				char usr[20];
+				printf("");
+				fgets(usr, 21, stdin);
+				char *token = strtok(usr, " ");
+				char *token2 = strtok(NULL, " ");
+				char *overall[] = {token, token2, NULL};
+				if( strcmp(overall[0], "continue") == 0 ){
+					printf("process %d started\n", pid);
+					response = 1;
+				}
+				if( strcmp(overall[0], "jobs") == 0 ){
+					printf("PID\t Process\n");
+					printf("%d\t\n");
+				}
+			}*/
+			break;
+		default:
+			printf("recieved signal %d\n", signo);
+	}
 }

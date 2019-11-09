@@ -1,6 +1,7 @@
-hello
- hostname
- history
- hello
+./math 100 < stdin.txt > output.txt
+ ./math 100 < stdin.txt > output.txt
+ ./math 10
+ ./math 100 < stdin.txt > output.txt
+ ./math 10
  quit
  

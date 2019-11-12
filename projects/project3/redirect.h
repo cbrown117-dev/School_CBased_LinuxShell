@@ -10,8 +10,9 @@
 
 #define MAX_LEN 1000
 
-static void redirect(int arrgc, char **argv, int place){
-	        pid_t pid;
+static void redirect(int argc, char **argv, int place){
+	        printf("blazersh> called to redirect.h\n");
+		pid_t pid;
 		time_t curtime, curtime2;
 		struct tm *loc_time; struct tm *loc_time2;
 		
@@ -36,7 +37,7 @@ static void redirect(int arrgc, char **argv, int place){
 		
 		fp = fopen(argv[place], "r");
 		
-		if(fp == null)
+		if(fp == NULL)
 			printf("there might not be a file\n");
 
 		pid = fork();
@@ -54,14 +55,12 @@ static void redirect(int arrgc, char **argv, int place){
 				strcpy(command2, token);
 
 				int pid_id = getpid();
-				char buf[50];
-				sprintf(buf, "%d.out", pid_id);
 			
 				/*
                			* open file to write standard output steam in append mode
                			* create a new file if the file does not exist
                			*/
-                		if( (fdout = open(buf, O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
+                		if( (fdout = open("stdout.txt", O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
        	                		printf("Error opening file stdout.txt for output\n");
                	        		exit(-1);
 				}

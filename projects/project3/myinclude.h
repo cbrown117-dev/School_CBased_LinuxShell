@@ -91,26 +91,9 @@ static void sig_usr(int signo){
 			break;  
 		case SIGTSTP:
 			printf("process with pid=%d is stopped\n", pid);
-			/*int response = 0;
-			char piece[10];
-			sprintf(piece, "%d", pid);
-			while(response == 0){
-				char usr[20];
-				printf("");
-				fgets(usr, 21, stdin);
-				char *token = strtok(usr, " ");
-				char *token2 = strtok(NULL, " ");
-				char *overall[] = {token, token2, NULL};
-				if( strcmp(overall[0], "continue") == 0 ){
-					printf("process %d started\n", pid);
-					response = 1;
-				}
-				if( strcmp(overall[0], "jobs") == 0 ){
-					printf("PID\t Process\n");
-					printf("%d\t\n");
-				}
-			}*/
 			break;
+		case SIGCONT:
+			printf("process with pid=%d has continued\n", pid);
 		default:
 			printf("recieved signal %d\n", signo);
 	}

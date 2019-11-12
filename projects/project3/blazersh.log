@@ -1,7 +1,4 @@
-./math 100 < stdin.txt > output.txt
- ./math 100 < stdin.txt > output.txt
- ./math 10
- ./math 100 < stdin.txt > output.txt
- ./math 10
+./math 20
+ ./math 20
  quit
  

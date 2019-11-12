@@ -177,7 +177,7 @@ void reg(char* path){
 	int len = strlen(path);
 	int i, j;
 	for(i=0;i<len;i++){
-		if ( path[i] == "/")
+		if ( path[i] == 47)
 			j = i;
 	}
 	printf("\t\t");

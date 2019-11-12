@@ -14,7 +14,6 @@
 #include "myinclude.h"
 #include "redirect.h"
 
-int countArgc(char[10][100]);
 
 int main(int argc, char **argv){
 	pid_t pid;
@@ -32,17 +31,20 @@ int main(int argc, char **argv){
 
 	while( strcmp(ch, "quit\n") != 0 ){
 		/*breaks down input into an array of strings */        
-		char commands[6][100];
+		char *commands[10];
+		char cmd[50];
 		char *token = strtok(ch, " ");
-	
+
+		strcpy(cmd, token);
+
 		while(token != NULL){
-			printf("token is %s and index is %d\n", token, index);
-                	strcpy(commands[index], token); 
+                	//strcpy(commands[index], token);
+			commands[index] = token; 
 			token  = strtok(NULL," ");
 			index++;
 		}
 
-		strcpy(commands[index],"\0");
+		commands[index] = NULL;
 
 		/* checks input for commands to do things */
 
@@ -96,8 +98,8 @@ int main(int argc, char **argv){
 				
 				pid = fork();
 				if( pid == 0 ){
-				
-					execvp(commands[0], commands);
+					printf("made it to execvp\n");				
+					execvp(cmd, commands);
 				
 					printf("blazersh> if you're seeing this the file may not exist or exec failed\n");
 					printf("blazersh> make sure you have ./ infront of your file name\n");

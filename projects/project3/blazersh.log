@@ -1,4 +1,10 @@
-./math 20
- ./math 20
+./math 100
+ jobs
+ ./math 100
+ jobs
+ continue
+ ./math 100
+ jobs
+ continue
  quit
  

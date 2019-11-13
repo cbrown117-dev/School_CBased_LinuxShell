@@ -14,15 +14,23 @@
 #include "myinclude.h"
 #include "redirect.h"
 
+typedef struct{
+	pid_t id;
+	char *name;
+}pid_process;
+
+void redirectRight(int, char**);
 
 int main(int argc, char **argv){
 	pid_t pid;
-	int status, check_status = 0;
+	pid_process array[10];
+	
+	int status, check_status = 0, index = 0;
 
-	if(argc < 2){  printf("need more arguements (a file to read and write to)\n"); }
+	if(argc < 2){  printf("need more arguements (a file to read and write to)\n");  exit(-1); }
 
 	FILE *build_hy = fopen(argv[1], "w");
-	int index = 0;
+
 
 	printf("blazersh> ");
 	char ch[150];
@@ -33,12 +41,13 @@ int main(int argc, char **argv){
 		/*breaks down input into an array of strings */        
 		char *commands[10];
 		char cmd[50];
+		char *pid_name;
 		char *token = strtok(ch, " ");
 
 		strcpy(cmd, token);
+		pid_name = cmd;
 
 		while(token != NULL){
-                	//strcpy(commands[index], token);
 			commands[index] = token; 
 			token  = strtok(NULL," ");
 			index++;
@@ -77,28 +86,39 @@ int main(int argc, char **argv){
 		else if( strcmp(ch,"help\n")== 0 )
 			help();
 
+		else if( strcmp(commands[0], "jobs\n") == 0 ){
+			int arrIndex;
+			for(arrIndex = 0; arrIndex<check_status;arrIndex++){
+				printf("PID\tProcess\n");
+				printf("%d\t%s", array[arrIndex].id, array[arrIndex].name);
+			}
+		}
 
 		else{ /* if the program works then execvp will not run  */
+			array[check_status].id = getpid();
+			array[check_status].name = pid_name;
 			
-			int i, pos = 0, left = 0, right = 0;
+			int i, left = 0, right = 0;
 			
 			for(i=0;i<index;i++){
-				if( strcmp(commands[i], "<") == 0 )
-					left = 1; pos = i;
+				if( strcmp(commands[i], "<") == 0 ){
+					printf("I see the < in the commands line\n");
+					left = 1;
+					redirect(index, commands, i+1);
+				}
 				if( strcmp(commands[i], ">") == 0 )
 					right = 1;
 			}
-	
-			if( left == 1 || right == 1){
-				printf("blazersh> I see the < in the command line\n");
-				redirect(index, commands, pos);	
-			}	
 
-			else{
+			if(right == 1 && left == 0){
+				redirectRight(index, commands);
+			}
+	
+			else if( right == 0 && left == 0 ){
 				
 				pid = fork();
 				if( pid == 0 ){
-					printf("made it to execvp\n");				
+					printf("made it to execvp in main\n");				
 					execvp(cmd, commands);
 				
 					printf("blazersh> if you're seeing this the file may not exist or exec failed\n");
@@ -124,24 +144,11 @@ int main(int argc, char **argv){
 						exit(-1);
 					}
 
-					/* going to put jobs and continue commands here 
-					 * might need to make a usrsig1 to send continue signal
-					 */
-				       	if ( strcmp(commands[0], "jobs") == 0 && check_status == 0){
-						printf("\nPID\tProcess\n");
-						int pid_id = getpid();
-						printf("%d\t%s", pid_id, commands[0]);
-					}
-
+					check_status++;
                 			waitpid(-1, &status, WUNTRACED);
-					check_status = 1;
 
-	                	if(WIFEXITED(status) && strcmp(commands[0], "jobs") == 0){
-        	                	printf("blazersh> \n");
-                		}
-				if(WIFEXITED(status)){
+				if( WIFEXITED(status) ){
 					printf("blazersh> child exited normally\n");
-					check_status = 0;
 				}
                 			else{
                         			printf("blazersh> child process did not terminate normally\n");
@@ -163,5 +170,35 @@ int main(int argc, char **argv){
 	fclose(build_hy);
 
 return 0;
+}
+
+void redirectRight(int index, char **commands){
+	int fdout, status;
+	pid_t pid;
+
+	pid = fork();
+	if( pid == 0 ){
+		
+		if( (fdout = open("stdout.txt", O_CREAT | O_APPEND | O_WRONLY, 0755)) == -1 ){
+			printf("Error opening file stdout.txt for output\n");
+			exit(-1);
+		}
+
+		dup2(fdout, 1);
+		printf("made it to execvp in redirectRight\n");
+		execvp(commands[0], commands);
+		printf("redirectRight failed error code: 1\n");
+	}
+
+	else if( pid > 0 ){
+		printf("blazersh> Waiting on the child to complete\n");
+		waitpid(-1, &status, WUNTRACED);
+
+		if( WIFEXITED(status) ){
+			printf("blazersh> exited normally\n");
+			close(fdout);
+		}
+		else printf("blazersh> did not exit normally\n");
+	}
 }
 

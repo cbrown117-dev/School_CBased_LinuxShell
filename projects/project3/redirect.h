@@ -13,12 +13,9 @@
 static void redirect(int argc, char **argv, int place){
 	        printf("blazersh> called to redirect.h\n");
 		pid_t pid;
-		time_t curtime, curtime2;
-		struct tm *loc_time; struct tm *loc_time2;
-		
-		char *start; char *end; char* command; char *command2;
-		int fdin, fdout, err, status;
-		FILE *fp; FILE *to = fopen("log.txt", "w");
+		int fdin, fdout, status, index=0;
+		FILE *fp;
+		char str[100];
 
 		if(argc < 2){
 			printf("Usage: %s <command>[args]\n", argv[0]);
@@ -34,7 +31,7 @@ static void redirect(int argc, char **argv, int place){
 			exit(-1);
 		}
 
-		
+		printf("argv[place] is %s\n", argv[place]);		
 		fp = fopen(argv[place], "r");
 		
 		if(fp == NULL)
@@ -42,18 +39,23 @@ static void redirect(int argc, char **argv, int place){
 
 		pid = fork();
 		if (pid == 0){ //is the child
-			while( !feof(fp) ){
-				char str[MAX_LEN];		
-				char *result = fgets(str, MAX_LEN, fp);
-				char *token = strtok(result," ");
-				char cmd[MAX_LEN];
-				strcpy(cmd, token);
-				token = strtok(NULL, " ");
-				char *overall[] = {cmd, token, NULL};
-				
-				strcpy(command, cmd);
-				strcpy(command2, token);
+			while( fgets(str, 100, fp) != NULL ){
+                		/*breaks down input into an array of strings */
+                		char *commands[10];
+                		char cmd[50];
+                		char *token = strtok(str, " ");
 
+                		strcpy(cmd, token);
+
+                	while(token != NULL){
+                        	//strcpy(commands[index], token);
+                        	commands[index] = token;
+                       		token  = strtok(NULL," ");
+                        	index++;
+                	}
+
+                		commands[index] = NULL;
+				
 				int pid_id = getpid();
 			
 				/*
@@ -72,10 +74,10 @@ static void redirect(int argc, char **argv, int place){
 				/*replace standard output stream with the file stdout.txt */
 				dup2(fdout, 1);
 
-				execvp(overall[0], overall);
+				execvp(cmd, commands);
 
 				/* since stdout is written to stdout.txt and not the terminal,
-				 * we should write to stderr in case exec fails. we use perror 
+				 * we should write to stderr in case exec fails. we use  
 				 * that writes the error message to stderr
 				 */
 				perror("exec");
@@ -84,13 +86,7 @@ static void redirect(int argc, char **argv, int place){
 
 		else if (pid > 0){ //this is the parent process
 			/*output from the parent process still goes to stdout : -) */
-			printf("Wait for the child process to terminate\n");
-                        
-		 	//time handle
-			curtime = time(NULL);
-			loc_time = localtime(&curtime);
-			printf("first time %s\n", asctime(loc_time));
-			strcpy(start, asctime(loc_time));				
+			printf("Wait for the child process to terminate\n");			
 			
 			wait(&status);
 						
@@ -100,10 +96,7 @@ static void redirect(int argc, char **argv, int place){
 				 * now that the child process is done, let us write to 
 				 * the file stdout.txt using the write system call
 				 */
-
-				/*write to log time it took*/
-				fprintf(to,"%s %s %s %s\n", command, command2, start,end);
-				
+	
 				close(fdout);
 					
 			}
@@ -121,5 +114,4 @@ static void redirect(int argc, char **argv, int place){
 			exit(EXIT_FAILURE);   
 		}
 			
-	fclose(to);
 }

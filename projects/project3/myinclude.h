@@ -90,10 +90,12 @@ static void sig_usr(int signo){
 			kill(ppid, SIGQUIT);
 			break;  
 		case SIGTSTP:
-			printf("process with pid=%d is stopped\n", pid);
+			printf("process with pid=%d is paused\n", pid);
+			kill(pid, SIGSTOP);
 			break;
 		case SIGCONT:
 			printf("process with pid=%d has continued\n", pid);
+			break;
 		default:
 			printf("recieved signal %d\n", signo);
 	}

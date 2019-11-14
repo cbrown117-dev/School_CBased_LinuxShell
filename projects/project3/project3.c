@@ -93,6 +93,15 @@ int main(int argc, char **argv){
 				printf("%d\t%s", array[arrIndex].id, array[arrIndex].name);
 			}
 		}
+	
+		else if( strcmp(commands[0], "continue") == 0 ){
+			int i;
+			for(i = 0;i<index;i++){
+				if(array[i].id == atoi(commands[1])){
+					kill( array[i].id, SIGCONT);
+				}	
+			}
+		}
 
 		else{ /* if the program works then execvp will not run  */
 			array[check_status].id = getpid();
@@ -117,8 +126,7 @@ int main(int argc, char **argv){
 			else if( right == 0 && left == 0 ){
 				
 				pid = fork();
-				if( pid == 0 ){
-					printf("made it to execvp in main\n");				
+				if( pid == 0 ){				
 					execvp(cmd, commands);
 				
 					printf("blazersh> if you're seeing this the file may not exist or exec failed\n");
@@ -154,6 +162,8 @@ int main(int argc, char **argv){
                         			printf("blazersh> child process did not terminate normally\n");
                 			}
         			}
+				
+				
 			}
 		}
 

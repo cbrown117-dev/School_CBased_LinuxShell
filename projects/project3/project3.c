@@ -96,7 +96,7 @@ int main(int argc, char **argv){
 	
 		else if( strcmp(commands[0], "continue") == 0 ){
 			int i;
-			for(i = 0;i<index;i++){
+			for(i = 0;i<check_status;i++){
 				if(array[i].id == atoi(commands[1])){
 					kill( array[i].id, SIGCONT);
 				}	

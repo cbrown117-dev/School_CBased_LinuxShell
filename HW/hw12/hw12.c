@@ -5,32 +5,33 @@
 
 pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
 
-struct my_threads{
-	double *a = NULL;
-	double sum = 0.0;
+typedef struct my_threads{
+	pthread_t ptid;
+	double sum;
 	int N;
 	int size;
-}th;
+	int tid;
+
+}THREAD;
 
 void *compute(void *arg){
 	int myStart, myEnd, myN, i;
-	long tid = (long)arg;
 
+	THREAD *threads = (THREAD *)arg;
 	//determine start and end of computation for the current thread
-	myN = N/size;
-	myStart = tid*myN;
+	myN = threads->N / threads->size;
+	myStart = threads->tid * myN;
 	myEnd = myStart + myN;
-	if (tid == (size-1)) myEnd = N;
+	if (threads->tid == (threads->size-1)) myEnd = threads->N;
 	
 	//compute partial sum
 	double mysum = 0.0;
 	for (i=myStart;i<myEnd;i++)
-		mysum += a[i];
+		mysum += (double)(i + 1);
 
 	//grab the lock, update sum and release lock
-	pthread_mutex_lock(&mutex);
-	sum += mysum;
-	pthread_mutex_unlock(&mutex);
+	threads->sum += mysum;
+	
 
 	return(NULL);
 }
@@ -45,22 +46,31 @@ int main(int argc, char **argv){
 	}
 
 	//set up struct
-	/*
-	N = atoi(argv[1]);
-	size = atoi(argv[2]);
+	
+	int numElements = atoi(argv[1]);
+	int numThreads = atoi(argv[2]);
+	
+	THREAD threads[numThreads];
 
 	//create threads
-	for (i = 0; i<size;i++)
-		pthread_create(&tid[i], NULL, compute, (void *)i);
+	for (i = 0; i<numThreads;i++){
+		threads[i].tid = i;
+		threads[i].N = numElements;
+		threads[i].size = numThreads;
+		pthread_create(&threads[i].ptid, NULL, compute, (void *)&threads[i]);
+	}
 
+	double totalsum = 0.0;
 	//wait for them to complete
-	for(i=0;i<size;i++)
-		pthread_join(tid[i], NULL);
+	for(i=0;i<numThreads;i++){
+		pthread_join(threads[i].ptid, NULL);
+		totalsum += threads[i].sum;
+	}
 
 	printf("The total is %g, it should be equal to %g\n",
-		sum, ((double)N*(N+1))/2);
+		totalsum, ((double)numElements*(numElements+1))/2);
 
-	*/
+	
 
 	return 0;
 }

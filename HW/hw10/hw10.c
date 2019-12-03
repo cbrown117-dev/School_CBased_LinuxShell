@@ -47,7 +47,7 @@ int main (int argc, char **argv){
 				char *overall[] = {cmd, token, NULL};
 				
 				strcpy(command, cmd); strcpy(command2, token);
-				printf("%s %s", command, command2);
+				printf("this is print inside main %s %s\n", command, command2);
 
 				int pid_id = getpid();
 				char buf[50];

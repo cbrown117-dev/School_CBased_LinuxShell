@@ -75,6 +75,7 @@ static void redirect(int argc, char **argv, int place, hyLog *hy){
 			 */
 
 			close(fdout);
+
 				
 		}
 		else { /*child process did not terminate normally */

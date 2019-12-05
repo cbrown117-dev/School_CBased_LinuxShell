@@ -67,22 +67,16 @@ int main(int argc, char **argv){
 				//fork it and add to the queue
 				printf("made it past insert\n");
 				jobs++;
-				printf("hy.job_ids = %d\n", hy[jobs-1].job_ids = jobs-1);
-				printf("hy.name = %s\n", hy[jobs-1].name = commands[1]);
 				ptr = localtime(NULL);
 				char *t = asctime(ptr);
-				printf("t = %s\n", t);
-				printf("start = %s\n",(hy[jobs-1].start = t));
-				printf("status is %s\n", hy[jobs-1].status = "running");
-
 				hy[jobs-1].job_ids = jobs-1;
 				hy[jobs-1].name = commands[1];  
 				hy[jobs-1].start = t;
 				hy[jobs-1].status = "running";
-
+				
 				/* execvp it in redirect.h */
 				redirect(index, commands, jobs-1, hy);
-				//printf here submitted job
+				printf("job %d added to the queue\n");
 				
 			}
 

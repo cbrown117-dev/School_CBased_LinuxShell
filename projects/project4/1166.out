@@ -1,0 +1,8 @@
+./dothis  4  (null)
+before setpgid
+before execvp
+x is 4
+in loop
+in loop
+in loop
+in loop

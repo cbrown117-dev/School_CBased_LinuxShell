@@ -6,8 +6,8 @@ int main(int argc, char **argv){
 	x = atoi(argv[1]);
 
 	printf("x is %d\n", x);
-	for(; ;){
-		
+	for(i=0;i<x;i++){
+		printf("in loop\n");
 	}
 
 return 0;

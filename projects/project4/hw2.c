@@ -1,17 +1,4 @@
-/****************************************************************************** 
-*  Sample C program for Homework1 in CS 432/632/732                           *
-*                                                                             *
-*  Program illustrate the use of dynamic memory allocation to create          *
-*  contiguous 2D-matrices and use traditional array indexing.                 *
-*  It also illustrate the use of gettime to measure wall clock time.          *
-*                                                                             *
-*  To Compile: gcc -Wall -O -o hw1 hw1.c                                      *
-*  To run: ./hw1 <size>                                                       *
-*                                                                             *
-*  Author: Purushotham Bangalore                                              *
-*  Email: puri@uab.edu                                                        *
-*  Date: January 9, 2016                                                      *
-******************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>

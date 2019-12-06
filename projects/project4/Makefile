@@ -3,17 +3,17 @@
 CC = gcc
 CFLAGS = -Wall -g #replace -g with -O when not debugging
 
-DEPS	= queue.h Makefile
-OBJS	= queue.o qdriver.o
+DEPS	= queue.h redirect.h Makefile
+OBJS	= queue.o project4.o
 
-EXECS	= queuetest
+EXECS	= project4
 
 all:	$(EXECS)
 
 %.o:	%.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-queuetest:	$(OBJS)
+project4:	$(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:	

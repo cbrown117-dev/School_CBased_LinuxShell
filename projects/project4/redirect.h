@@ -7,27 +7,36 @@
 #include <fcntl.h>
 #include <time.h>
 #include <string.h>
+#include <signal.h>
+
+#include "queue.h"
 
 #define MAX_LEN 1000
 typedef struct{
-	char *name;                                                                                                                                                                                                                                  int job_ids;                                                                                                                                                                                                                                 char *start;
+	char *name;
+	int job_ids;
+	char *start;
 	char *end;
 	char *status;
 }hyLog;
 
-static void redirect(int argc, char **argv, int place, hyLog *hy){
+void printhy(hyLog hy[10]);
+
+static void redirect(int check, char **argv, int place, queue *q){
 	pid_t pid;
 	int fdout, status;
-
-	if(argc < 2){
-		printf("Usage: %s <command>[args]\n", argv[0]);
-		exit(-1);
-	}	
+	struct tm* loc_time;
+	time_t curtime;
+	curtime = time(NULL);
 	
+	hyLog hy[10];
+	
+	if(check == 2){
+		printhy(hy);
+	}else{
 	pid = fork();
 	if (pid == 0){ //this is the child
 		int pid_id = getpid();
-		int pgid = getpgid(pid);
 		char buf[100];
 		sprintf(buf, "%d.out", pid_id);
 
@@ -40,13 +49,10 @@ static void redirect(int argc, char **argv, int place, hyLog *hy){
              		exit(-1);
 		}
 			
-		/*replace standard output stream with the file stdout.txt */
 		dup2(fdout, 1);
 
 		char *commands[] = {argv[1], argv[2], NULL};
-		printf("%s  %s  %s\n", commands[0], commands[1], commands[2]);
-		if( setpgid(pid_id,0) != 0)
-			perror("setpgid() error");
+
 		execvp(commands[0], commands);
 
 		/* since stdout is written to stdout.txt and not the terminal,
@@ -59,27 +65,38 @@ static void redirect(int argc, char **argv, int place, hyLog *hy){
 
 	else if (pid > 0){ //this is the parent process
 	/*output from the parent process still goes to stdout : -) */
-		printf("Wait for the child process to terminate\n");			
-	
-	
-				
+		loc_time = localtime(&curtime);		
+		hy[place].start = asctime(loc_time);	
+                hy[place].name = q->buffer[q->end % q->size];
+                hy[place].job_ids = q->jobID[q->end % q->size];
+                hy[place].status = "success";
+                curtime = time(NULL);
+                loc_time = localtime(&curtime);	
+
 		if( WIFEXITED(status) ){ /*child process terminated normally */
-			printf("Child process exited with status = %d\n", WEXITSTATUS(status));
-		/*parent process still has the file handle to stdou.txt,
-		 * now that the child process is done, let us write to 
-		 * the file stdout.txt using the write system call
-		 */
+			hy[place].end = asctime(loc_time);
+			queue_delete(q, place);
+				
+		}
 
-		close(fdout);
+	close(fdout);
 
-			
-		}			
-	
 	} 
 		
 	else{ /*we have an error */
 		perror("fork");
 		exit(EXIT_FAILURE);   
 	}
-		
+	}		
+}
+
+void printhy(hyLog hy[10]){
+	printf("jobid\tcommand\tstarttime\tendtime\t\tstatus\n");
+	int i;
+	for(i=0;i<10;i++){
+		if( strcmp(hy[i].status, "success") == 0 ){
+			printf("%d\t%s\t%s\t%s\t\t%s\n", 
+					hy[i].job_ids, hy[i].name, hy[i].start, hy[i].end, hy[i].status);
+		}
+	}
 }

@@ -1,3 +1,14 @@
 made it to execvp in redirectRight
 we waited for 10 seconds
 we waited for 15 seconds
+made it to execvp in redirectRight
+we waited for 0 seconds
+Time taken for size 1000 = 4.180468 seconds
+made it to execvp in redirectRight
+we waited for 10 seconds
+made it to execvp in redirectRight
+we waited for 2 seconds
+made it to execvp in redirectRight
+we waited for 2 seconds
+made it to execvp in redirectRight
+we waited for 2 seconds

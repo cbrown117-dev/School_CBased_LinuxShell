@@ -1,4 +1,4 @@
-# School_CBased_LinuxShell
+# School_CBased_UnixShell
 my CS332 school projects
 
 This contains everything I worked on in the Computer Science class CS332 Systems Programming.
